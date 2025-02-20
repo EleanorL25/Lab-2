@@ -1,0 +1,203 @@
+---
+title: "Lab 2 ESS330"
+author: "Eleanor Lindsey"
+format: html
+editor: visual
+---
+
+```{r}
+install.packages("dplyr")
+head(tree_dat)
+```
+
+```{r}
+library(dplyr)
+```
+
+```{r}
+#1
+tree_dat%>%summarise(n=n())
+nrow(tree_dat)
+#Answer=131386
+```
+
+```{r}
+#2 look at this data set then select the rows with ID 1, and then tally that count.
+
+tree_count1<-tree_dat %>% 
+  filter(standID==1)%>%
+  tally()
+  
+#answer=979
+```
+
+```{r}
+#3 Filter tree species ABBA and PIST and count the occurances of each species 
+Tree_Species_Count<-tree_dat%>%
+    filter(species %in% c("ABBA", "PIST"))%>%
+    count(species)
+ #Answer: ABBA=13033,PIST=4188
+```
+
+```{r}
+#4 How many trees are older than 200 years old in the last year of the data set
+last_year<- max(tree_dat$year, na.rm=TRUE) 
+
+tree_dat%>%
+  filter(year==last_year, age>200)%>%
+  tally()
+#answer=7 trees
+
+#filter is used when you want to pick a specific thing out of a data set. 
+#Tally counts the number of occurances based on the filtering of the data set. (Head, Print, Count all do the same thing as Tally)
+#%>% is used to connect each peice so the tally knows to count the filter of the tree data
+```
+
+```{r}
+#5
+oldest_tree<-tree_dat%>%
+    slice_max(order_by=age, n=1)
+print(oldest_tree)
+#Answer=260 years old
+
+#n=1 selects the single oldest tree. If i put n=2 it would select the two oldest trees
+# order_by chooses the order in which R categorizes the data in this case it is by year
+#Slice_max picks out the value from the data set with the maximum age
+```
+
+```{r}
+#6
+#Find the oldest trees from 2001
+Oldest_trees_2001<-tree_dat%>%
+  filter(year==2001)%>%
+  slice_max(order_by=age, n=5)
+print(Oldest_trees_2001)
+#Answer= 263, 259, 212, 206, and 206 years old
+```
+
+```{r}
+#7
+Trees_30percent_2002<-tree_dat%>%
+  filter(year==2002)%>%
+  slice_sample(prop=0.3)%>%
+  summarize(n=n())
+
+print(Trees_30percent_2002)
+#Answer=687 trees
+
+#Slice_Sample takes a sample from the year 2002 as the filter states. 
+#prop is the "proportion" or percentage of the slice in this case 0.3 or 30% of the year 2002
+#Summarize n=n gathers this new categorization of data and creates a new table. The n=n just means there is no cap for the amount of figures that can be represented.
+```
+
+```{r}
+#8
+tree_dat%>%
+  filter(year==2007)%>%
+  filter(standID==5)%>%
+  arrange(-rad_ib)%>%
+  slice_head(n=3)
+#Answer= 238,217,210
+
+#the filter function is separating the data from 2007 from the rest of the data frame. Filter is also taking data from the fifth standID from the data frame. 
+#Arrange is arranging the radius column in descending order (hence the - sign in front of the column name).
+#The slice_head function is taking the top three trees from the descending list provided above. 
+```
+
+```{r}
+#9
+Consolidated_tree_table<-tree_dat%>%
+  select(treeID,standID,year,rad_ib)%>%
+  filter(standID==3,year==2007)%>%
+  slice_min(rad_ib, n=3)
+# The purpose of this code is to remove unneeded columns from the data frame. Using the select function I selected the columns I wanted to keep. 
+#By using the filter function I took the selected columns and focused on the year 2007 and the standID 3. 
+#By slicing I took this new table I created and told R to only use the top 3 values from the radius column. 
+```
+
+```{r}
+#10
+tree_dat%>%
+  select(!stand)%>%
+  glimpse()
+# Taking the tree data dataframe I selected the stand column and by placing an exclamation point in front of the column I told R to remove it from the data frame. 
+```
+
+```{r}
+#11
+tree_dat%>%
+  select(contains("ID"))%>%
+  glimpse()
+# Using the select funtion I created a table of columns containing the word ID.
+```
+
+```{r}
+#12
+tree_dat%>%
+  select(contains(c("ID","stand")))%>%
+  glimpse()
+# the select function with the c() creates a list for R to use to identify column names with ID and stand in the name and populate a table with just these columns. 
+```
+
+```{r}
+#13
+With_units<-tree_dat%>%rename(rad_mm=rad_ib, inc_mm=inc)%>%
+  glimpse()
+# I created a new table using the Tree data frame. I renamed the radius and inc columns to include units.
+```
+
+```{r}
+#14
+
+# create a function to convert the radius from mm to cm in a new data frame.
+mm2cm <- function(x) {
+  return(x / 10)
+}
+
+# use the new function to convert full column of rad to cm
+Rad_Conversion_BAC <- tree_dat %>%
+  mutate(rad_ib = mm2cm(rad_ib))
+
+
+# Calculate mean BAm2 for the filtered data
+mean_BAm2 <- tree_dat %>%
+  mutate(rad_ib = mm2cm(rad_ib)) %>% # Convert rad_ib from mm to cm
+  mutate(BAm2 = 0.00007854 * rad_ib^2) %>% # Calculate BAm2
+  filter(species == "POTR", year == 2007) %>% 
+  pull(BAm2) %>% # Extract the BAm2 column as a vector
+  mean(na.rm = TRUE) # Calculate the mean, ignoring NA values
+
+print(mean_BAm2)
+
+
+Tree_BAC<-tree_dat_BAC%>%
+  mutate(BAm2=0.00007854*rad_ib^2)%>%
+  filter(species=="POTR", year==2007)%>%
+  mean(BAm2, na.rm=TRUE)
+#What is the mean BA_m2 of the the species POTR in 2007?
+
+```
+
+```{r}
+#15
+```
+
+```{r}
+#16
+```
+
+```{r}
+#17
+```
+
+```{r}
+#18
+```
+
+```{r}
+#19
+```
+
+```{r}
+#20
+```
